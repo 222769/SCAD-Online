@@ -1,7 +1,7 @@
 // Offline support: the app shell (including the ~11 MB OpenSCAD engine) is cached
 // on first visit so the app works without a connection once added to the Home Screen.
 // Bump VERSION when vendored files change (app files are fetched network-first).
-const VERSION = 'v2';
+const VERSION = 'v3';
 const CACHE = `scad-online-${VERSION}`;
 const ASSETS = [
   './',

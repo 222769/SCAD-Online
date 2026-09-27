@@ -391,21 +391,36 @@ $('#edges-btn').addEventListener('click', (e) => {
 for (const ev of ['gesturestart', 'gesturechange']) $('#viewer').addEventListener(ev, (e) => e.preventDefault());
 
 // ---------- Files ----------
-const fileInput = $('#file-input');
-// iOS only opens the picker from inside the tap's own click handler (not after the
-// dialog's async close event), and not while the modal menu makes the input inert.
-$('#menu-open').addEventListener('click', () => {
-  menu.close();
-  fileInput.click();
-});
-fileInput.addEventListener('change', async () => {
-  const files = [...fileInput.files];
-  fileInput.value = '';
-  if (files.length) await openFiles(files);
-});
+const APP_VERSION = 3;
+$('#app-version').textContent = `SCAD Online v${APP_VERSION}`;
+
+for (const input of $$('.file-overlay')) {
+  input.addEventListener('change', async () => {
+    const files = [...(input.files || [])];
+    input.value = '';
+    if (menu.open) menu.close();
+    if (!files.length) return;
+    try {
+      await openFiles(files);
+    } catch (err) {
+      toast(`Couldn't read ${files[0].name}: ${err?.message || err}`);
+    }
+  });
+}
+
+function readText(file) {
+  if (file.text) return file.text();
+  return new Promise((resolve, reject) => {
+    const r = new FileReader();
+    r.onload = () => resolve(r.result);
+    r.onerror = () => reject(r.error);
+    r.readAsText(file);
+  });
+}
 
 async function openFiles(files) {
-  const entries = await Promise.all(files.map(async (f) => [f.name, await f.text()]));
+  toast(`Reading ${files[0].name}…`);
+  const entries = await Promise.all(files.map(async (f) => [f.name, await readText(f)]));
   const scad = entries.filter(([n]) => /\.scad$/i.test(n));
   const pool = scad.length ? scad : entries;
   // The main file is the one no other opened file includes.
@@ -606,5 +621,13 @@ async function boot() {
 boot();
 
 if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  navigator.serviceWorker.register('sw.js', { updateViaCache: 'none' })
+    .then((reg) => reg.update())
+    .catch(() => {});
+  // When a newer service worker takes over, reload once so the page runs the new code.
+  let reloaded = false;
+  const hadController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (hadController && !reloaded) { reloaded = true; location.reload(); }
+  });
 }
