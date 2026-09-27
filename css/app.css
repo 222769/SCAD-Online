@@ -254,12 +254,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .35); }
 @keyframes slide-up { from { transform: translateY(40px); opacity: 0; } }
 .sheet form { display: grid; gap: 8px; }
 .sheet-group { background: var(--surface); border-radius: 14px; overflow: hidden; }
-.sheet-group button {
+.sheet-group button, .sheet-btn {
   display: block; width: 100%; border: 0; background: none; padding: 16px; font-size: 17px;
   color: var(--accent); border-bottom: 1px solid var(--border);
 }
-.sheet-group button:last-child { border-bottom: 0; }
-.sheet-group button:active { background: var(--surface-2); }
+.sheet-group > :last-child { border-bottom: 0; }
+.sheet-group button:active, .sheet-btn:active { background: var(--surface-2); }
 .sheet-group button:disabled { color: var(--muted); opacity: .6; }
 .sheet-group button.cancel { font-weight: 600; }
 .sheet-group button.danger { color: var(--danger); }
@@ -276,3 +276,10 @@ body.dragging #viewer-pane::after {
   border: 3px dashed var(--accent); border-radius: 16px; font-weight: 600; color: var(--accent);
   background: color-mix(in srgb, var(--surface) 60%, transparent);
 }
+
+.sheet-btn { text-align: center; cursor: pointer; }
+.visually-hidden {
+  position: fixed; width: 1px; height: 1px; opacity: 0; overflow: hidden; clip: rect(0 0 0 0); pointer-events: none;
+}
+label.icon-btn { cursor: pointer; }
+.inline-open { color: var(--accent); font-weight: 600; text-decoration: underline; pointer-events: auto; cursor: pointer; }

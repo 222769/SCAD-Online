@@ -392,6 +392,12 @@ for (const ev of ['gesturestart', 'gesturechange']) $('#viewer').addEventListene
 
 // ---------- Files ----------
 const fileInput = $('#file-input');
+// iOS only opens the picker from inside the tap's own click handler (not after the
+// dialog's async close event), and not while the modal menu makes the input inert.
+$('#menu-open').addEventListener('click', () => {
+  menu.close();
+  fileInput.click();
+});
 fileInput.addEventListener('change', async () => {
   const files = [...fileInput.files];
   fileInput.value = '';
@@ -527,7 +533,6 @@ menu.addEventListener('close', () => {
       setFile('untitled.scad', '// New model\n\ncube(10);\n');
       setTab('code');
       break;
-    case 'open': fileInput.click(); break;
     case 'examples': $('#examples').showModal(); break;
     case 'share-stl': shareStl(); break;
     case 'download-stl': saveBlob(stlFile(), baseName() + '.stl'); break;
